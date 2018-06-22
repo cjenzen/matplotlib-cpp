@@ -37,6 +37,7 @@ struct _interpreter {
     PyObject *s_python_function_save;
     PyObject *s_python_function_figure;
     PyObject *s_python_function_plot;
+    PyObject *s_python_function_eventplot;
     PyObject *s_python_function_semilogx;
     PyObject *s_python_function_semilogy;
     PyObject *s_python_function_loglog;
@@ -114,7 +115,9 @@ private:
 
         PyObject* matplotlib = PyImport_Import(matplotlibname);
         Py_DECREF(matplotlibname);
-        if (!matplotlib) { throw std::runtime_error("Error loading module matplotlib!"); }
+        if (!matplotlib) {
+            throw std::runtime_error("Error loading module matplotlib!");
+        }
 
         // matplotlib.use() must be called *before* pylab, matplotlib.pyplot,
         // or matplotlib.backends is imported for the first time
@@ -124,12 +127,16 @@ private:
 
         PyObject* pymod = PyImport_Import(pyplotname);
         Py_DECREF(pyplotname);
-        if (!pymod) { throw std::runtime_error("Error loading module matplotlib.pyplot!"); }
+        if (!pymod) {
+            throw std::runtime_error("Error loading module matplotlib.pyplot!");
+        }
 
 
         PyObject* pylabmod = PyImport_Import(pylabname);
         Py_DECREF(pylabname);
-        if (!pylabmod) { throw std::runtime_error("Error loading module pylab!"); }
+        if (!pylabmod) {
+            throw std::runtime_error("Error loading module pylab!");
+        }
 
         s_python_function_show = PyObject_GetAttrString(pymod, "show");
         s_python_function_close = PyObject_GetAttrString(pymod, "close");
@@ -137,6 +144,7 @@ private:
         s_python_function_pause = PyObject_GetAttrString(pymod, "pause");
         s_python_function_figure = PyObject_GetAttrString(pymod, "figure");
         s_python_function_plot = PyObject_GetAttrString(pymod, "plot");
+        s_python_function_eventplot = PyObject_GetAttrString(pymod, "eventplot");
         s_python_function_semilogx = PyObject_GetAttrString(pymod, "semilogx");
         s_python_function_semilogy = PyObject_GetAttrString(pymod, "semilogy");
         s_python_function_loglog = PyObject_GetAttrString(pymod, "loglog");
@@ -161,63 +169,69 @@ private:
         s_python_function_xkcd = PyObject_GetAttrString(pymod, "xkcd");
 
         if(    !s_python_function_show
-            || !s_python_function_close
-            || !s_python_function_draw
-            || !s_python_function_pause
-            || !s_python_function_figure
-            || !s_python_function_plot
-            || !s_python_function_semilogx
-            || !s_python_function_semilogy
-            || !s_python_function_loglog
-            || !s_python_function_fill_between
-            || !s_python_function_subplot
-            || !s_python_function_legend
-            || !s_python_function_ylim
-            || !s_python_function_title
-            || !s_python_function_axis
-            || !s_python_function_xlabel
-            || !s_python_function_ylabel
-            || !s_python_function_grid
-            || !s_python_function_xlim
-            || !s_python_function_ion
-            || !s_python_function_save
-            || !s_python_function_clf
-            || !s_python_function_annotate
-            || !s_python_function_errorbar
-            || !s_python_function_errorbar
-            || !s_python_function_tight_layout
-            || !s_python_function_stem
-            || !s_python_function_xkcd
-        ) { throw std::runtime_error("Couldn't find required function!"); }
+                || !s_python_function_close
+                || !s_python_function_draw
+                || !s_python_function_pause
+                || !s_python_function_figure
+                || !s_python_function_plot
+                || !s_python_function_eventplot
+                || !s_python_function_semilogx
+                || !s_python_function_semilogy
+                || !s_python_function_loglog
+                || !s_python_function_fill_between
+                || !s_python_function_subplot
+                || !s_python_function_legend
+                || !s_python_function_ylim
+                || !s_python_function_title
+                || !s_python_function_axis
+                || !s_python_function_xlabel
+                || !s_python_function_ylabel
+                || !s_python_function_grid
+                || !s_python_function_xlim
+                || !s_python_function_ion
+                || !s_python_function_save
+                || !s_python_function_clf
+                || !s_python_function_annotate
+                || !s_python_function_errorbar
+                || !s_python_function_errorbar
+                || !s_python_function_tight_layout
+                || !s_python_function_stem
+                || !s_python_function_xkcd
+          ) {
+            throw std::runtime_error("Couldn't find required function!");
+        }
 
         if (   !PyFunction_Check(s_python_function_show)
-            || !PyFunction_Check(s_python_function_close)
-            || !PyFunction_Check(s_python_function_draw)
-            || !PyFunction_Check(s_python_function_pause)
-            || !PyFunction_Check(s_python_function_figure)
-            || !PyFunction_Check(s_python_function_plot)
-            || !PyFunction_Check(s_python_function_semilogx)
-            || !PyFunction_Check(s_python_function_semilogy)
-            || !PyFunction_Check(s_python_function_loglog)
-            || !PyFunction_Check(s_python_function_fill_between)
-            || !PyFunction_Check(s_python_function_subplot)
-            || !PyFunction_Check(s_python_function_legend)
-            || !PyFunction_Check(s_python_function_annotate)
-            || !PyFunction_Check(s_python_function_ylim)
-            || !PyFunction_Check(s_python_function_title)
-            || !PyFunction_Check(s_python_function_axis)
-            || !PyFunction_Check(s_python_function_xlabel)
-            || !PyFunction_Check(s_python_function_ylabel)
-            || !PyFunction_Check(s_python_function_grid)
-            || !PyFunction_Check(s_python_function_xlim)
-            || !PyFunction_Check(s_python_function_ion)
-            || !PyFunction_Check(s_python_function_save)
-            || !PyFunction_Check(s_python_function_clf)
-            || !PyFunction_Check(s_python_function_tight_layout)
-            || !PyFunction_Check(s_python_function_errorbar)
-            || !PyFunction_Check(s_python_function_stem)
-            || !PyFunction_Check(s_python_function_xkcd)
-        ) { throw std::runtime_error("Python object is unexpectedly not a PyFunction."); }
+                || !PyFunction_Check(s_python_function_close)
+                || !PyFunction_Check(s_python_function_draw)
+                || !PyFunction_Check(s_python_function_pause)
+                || !PyFunction_Check(s_python_function_figure)
+                || !PyFunction_Check(s_python_function_plot)
+                || !PyFunction_Check(s_python_function_eventplot)
+                || !PyFunction_Check(s_python_function_semilogx)
+                || !PyFunction_Check(s_python_function_semilogy)
+                || !PyFunction_Check(s_python_function_loglog)
+                || !PyFunction_Check(s_python_function_fill_between)
+                || !PyFunction_Check(s_python_function_subplot)
+                || !PyFunction_Check(s_python_function_legend)
+                || !PyFunction_Check(s_python_function_annotate)
+                || !PyFunction_Check(s_python_function_ylim)
+                || !PyFunction_Check(s_python_function_title)
+                || !PyFunction_Check(s_python_function_axis)
+                || !PyFunction_Check(s_python_function_xlabel)
+                || !PyFunction_Check(s_python_function_ylabel)
+                || !PyFunction_Check(s_python_function_grid)
+                || !PyFunction_Check(s_python_function_xlim)
+                || !PyFunction_Check(s_python_function_ion)
+                || !PyFunction_Check(s_python_function_save)
+                || !PyFunction_Check(s_python_function_clf)
+                || !PyFunction_Check(s_python_function_tight_layout)
+                || !PyFunction_Check(s_python_function_errorbar)
+                || !PyFunction_Check(s_python_function_stem)
+                || !PyFunction_Check(s_python_function_xkcd)
+           ) {
+            throw std::runtime_error("Python object is unexpectedly not a PyFunction.");
+        }
 
         s_python_empty_tuple = PyTuple_New(0);
     }
@@ -261,18 +275,42 @@ inline bool annotate(std::string annotation, double x, double y)
 
 #ifndef WITHOUT_NUMPY
 // Type selector for numpy array conversion
-template <typename T> struct select_npy_type { const static NPY_TYPES type = NPY_NOTYPE; }; //Default
-template <> struct select_npy_type<double> { const static NPY_TYPES type = NPY_DOUBLE; };
-template <> struct select_npy_type<float> { const static NPY_TYPES type = NPY_FLOAT; };
-template <> struct select_npy_type<bool> { const static NPY_TYPES type = NPY_BOOL; };
-template <> struct select_npy_type<int8_t> { const static NPY_TYPES type = NPY_INT8; };
-template <> struct select_npy_type<int16_t> { const static NPY_TYPES type = NPY_SHORT; };
-template <> struct select_npy_type<int32_t> { const static NPY_TYPES type = NPY_INT; };
-template <> struct select_npy_type<int64_t> { const static NPY_TYPES type = NPY_INT64; };
-template <> struct select_npy_type<uint8_t> { const static NPY_TYPES type = NPY_UINT8; };
-template <> struct select_npy_type<uint16_t> { const static NPY_TYPES type = NPY_USHORT; };
-template <> struct select_npy_type<uint32_t> { const static NPY_TYPES type = NPY_ULONG; };
-template <> struct select_npy_type<uint64_t> { const static NPY_TYPES type = NPY_UINT64; };
+template <typename T> struct select_npy_type {
+    const static NPY_TYPES type = NPY_NOTYPE;
+}; //Default
+template <> struct select_npy_type<double> {
+    const static NPY_TYPES type = NPY_DOUBLE;
+};
+template <> struct select_npy_type<float> {
+    const static NPY_TYPES type = NPY_FLOAT;
+};
+template <> struct select_npy_type<bool> {
+    const static NPY_TYPES type = NPY_BOOL;
+};
+template <> struct select_npy_type<int8_t> {
+    const static NPY_TYPES type = NPY_INT8;
+};
+template <> struct select_npy_type<int16_t> {
+    const static NPY_TYPES type = NPY_SHORT;
+};
+template <> struct select_npy_type<int32_t> {
+    const static NPY_TYPES type = NPY_INT;
+};
+template <> struct select_npy_type<int64_t> {
+    const static NPY_TYPES type = NPY_INT64;
+};
+template <> struct select_npy_type<uint8_t> {
+    const static NPY_TYPES type = NPY_UINT8;
+};
+template <> struct select_npy_type<uint16_t> {
+    const static NPY_TYPES type = NPY_USHORT;
+};
+template <> struct select_npy_type<uint32_t> {
+    const static NPY_TYPES type = NPY_ULONG;
+};
+template <> struct select_npy_type<uint64_t> {
+    const static NPY_TYPES type = NPY_UINT64;
+};
 
 template<typename Numeric>
 PyObject* get_array(const std::vector<Numeric>& v)
@@ -338,6 +376,45 @@ bool plot(const std::vector<Numeric> &x, const std::vector<Numeric> &y, const st
 }
 
 template<typename Numeric>
+bool eventplot(const std::vector<std::vector<Numeric>> &events, const std::map<std::string, std::string>& keywords = std::map<std::string, std::string>())
+{
+    PyObject* list = PyList_New(events.size());
+    // using numpy arrays
+    for(size_t i = 0; i < events.size(); i++) {
+        PyList_SetItem(list, i, get_array(events[i]));
+    }
+
+    PyObject* res;
+    // construct positional args
+    if(keywords.size()>0) {
+        PyObject* args = PyTuple_New(2);
+        PyTuple_SetItem(args, 0, list);
+
+        // construct keyword args
+        PyObject* kwargs = PyDict_New();
+        for(std::map<std::string, std::string>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
+        {
+            PyDict_SetItemString(kwargs, it->first.c_str(), PyString_FromString(it->second.c_str()));
+        }
+
+        res = PyObject_CallObject(detail::_interpreter::get().s_python_function_eventplot, args);
+        Py_DECREF(kwargs);
+        Py_DECREF(args);
+    }
+    else {
+        PyObject* args = PyTuple_New(1);
+        PyTuple_SetItem(args, 0, list);
+
+        res = PyObject_CallObject(detail::_interpreter::get().s_python_function_eventplot, args);
+
+        Py_DECREF(args);
+    }
+
+    if(res) Py_DECREF(res);
+    return res;
+}
+
+template<typename Numeric>
 bool stem(const std::vector<Numeric> &x, const std::vector<Numeric> &y, const std::map<std::string, std::string>& keywords)
 {
     assert(x.size() == y.size());
@@ -354,13 +431,13 @@ bool stem(const std::vector<Numeric> &x, const std::vector<Numeric> &y, const st
     // construct keyword args
     PyObject* kwargs = PyDict_New();
     for (std::map<std::string, std::string>::const_iterator it =
-            keywords.begin(); it != keywords.end(); ++it) {
+                keywords.begin(); it != keywords.end(); ++it) {
         PyDict_SetItemString(kwargs, it->first.c_str(),
-                PyString_FromString(it->second.c_str()));
+                             PyString_FromString(it->second.c_str()));
     }
 
     PyObject* res = PyObject_Call(
-            detail::_interpreter::get().s_python_function_stem, args, kwargs);
+                        detail::_interpreter::get().s_python_function_stem, args, kwargs);
 
     Py_DECREF(args);
     Py_DECREF(kwargs);
@@ -493,7 +570,7 @@ bool stem(const std::vector<NumericX>& x, const std::vector<NumericY>& y, const 
     PyTuple_SetItem(plot_args, 2, pystring);
 
     PyObject* res = PyObject_CallObject(
-            detail::_interpreter::get().s_python_function_stem, plot_args);
+                        detail::_interpreter::get().s_python_function_stem, plot_args);
 
     Py_DECREF(plot_args);
     if (res)
@@ -762,8 +839,8 @@ inline void figure_size(size_t w, size_t h)
     PyDict_SetItemString(kwargs, "figsize", size);
     PyDict_SetItemString(kwargs, "dpi", PyLong_FromSize_t(dpi));
 
-    PyObject* res = PyObject_Call(detail::_interpreter::get().s_python_function_figure, 
-            detail::_interpreter::get().s_python_empty_tuple, kwargs);
+    PyObject* res = PyObject_Call(detail::_interpreter::get().s_python_function_figure,
+                                  detail::_interpreter::get().s_python_empty_tuple, kwargs);
 
     Py_DECREF(kwargs);
 
@@ -937,15 +1014,15 @@ inline void show(const bool block = true)
     if(block)
     {
         res = PyObject_CallObject(
-                detail::_interpreter::get().s_python_function_show,
-                detail::_interpreter::get().s_python_empty_tuple);
+                  detail::_interpreter::get().s_python_function_show,
+                  detail::_interpreter::get().s_python_empty_tuple);
     }
     else
     {
         PyObject *kwargs = PyDict_New();
         PyDict_SetItemString(kwargs, "block", Py_False);
         res = PyObject_Call( detail::_interpreter::get().s_python_function_show, detail::_interpreter::get().s_python_empty_tuple, kwargs);
-	Py_DECREF(kwargs);
+        Py_DECREF(kwargs);
     }
 
 
@@ -957,8 +1034,8 @@ inline void show(const bool block = true)
 inline void close()
 {
     PyObject* res = PyObject_CallObject(
-            detail::_interpreter::get().s_python_function_close,
-            detail::_interpreter::get().s_python_empty_tuple);
+                        detail::_interpreter::get().s_python_function_close,
+                        detail::_interpreter::get().s_python_empty_tuple);
 
     if (!res) throw std::runtime_error("Call to close() failed.");
 
@@ -970,7 +1047,7 @@ inline void xkcd() {
     PyObject *kwargs = PyDict_New();
 
     res = PyObject_Call(detail::_interpreter::get().s_python_function_xkcd,
-            detail::_interpreter::get().s_python_empty_tuple, kwargs);
+                        detail::_interpreter::get().s_python_empty_tuple, kwargs);
 
     Py_DECREF(kwargs);
 
@@ -983,8 +1060,8 @@ inline void xkcd() {
 inline void draw()
 {
     PyObject* res = PyObject_CallObject(
-        detail::_interpreter::get().s_python_function_draw,
-        detail::_interpreter::get().s_python_empty_tuple);
+                        detail::_interpreter::get().s_python_function_draw,
+                        detail::_interpreter::get().s_python_empty_tuple);
 
     if (!res) throw std::runtime_error("Call to draw() failed.");
 
@@ -1020,18 +1097,18 @@ inline void save(const std::string& filename)
 
 inline void clf() {
     PyObject *res = PyObject_CallObject(
-        detail::_interpreter::get().s_python_function_clf,
-        detail::_interpreter::get().s_python_empty_tuple);
+                        detail::_interpreter::get().s_python_function_clf,
+                        detail::_interpreter::get().s_python_empty_tuple);
 
     if (!res) throw std::runtime_error("Call to clf() failed.");
 
     Py_DECREF(res);
 }
 
-    inline void ion() {
+inline void ion() {
     PyObject *res = PyObject_CallObject(
-        detail::_interpreter::get().s_python_function_ion,
-        detail::_interpreter::get().s_python_empty_tuple);
+                        detail::_interpreter::get().s_python_function_ion,
+                        detail::_interpreter::get().s_python_empty_tuple);
 
     if (!res) throw std::runtime_error("Call to ion() failed.");
 
@@ -1041,8 +1118,8 @@ inline void clf() {
 // Actually, is there any reason not to call this automatically for every plot?
 inline void tight_layout() {
     PyObject *res = PyObject_CallObject(
-        detail::_interpreter::get().s_python_function_tight_layout,
-        detail::_interpreter::get().s_python_empty_tuple);
+                        detail::_interpreter::get().s_python_function_tight_layout,
+                        detail::_interpreter::get().s_python_empty_tuple);
 
     if (!res) throw std::runtime_error("Call to tight_layout() failed.");
 
@@ -1069,7 +1146,9 @@ struct is_callable_impl<false, T>
 template<typename T>
 struct is_callable_impl<true, T>
 {
-    struct Fallback { void operator()(); };
+    struct Fallback {
+        void operator()();
+    };
     struct Derived : T, Fallback { };
 
     template<typename U, U> struct Check;
@@ -1155,7 +1234,9 @@ struct plot_impl<std::true_type>
 
 // recursion stop for the above
 template<typename... Args>
-bool plot() { return true; }
+bool plot() {
+    return true;
+}
 
 template<typename A, typename B, typename... Args>
 bool plot(const A& a, const B& b, const std::string& format, Args... args)
