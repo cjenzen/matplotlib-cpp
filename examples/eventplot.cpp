@@ -18,8 +18,10 @@ int main()
 
     // Set the size of output image = 1200x780 pixels
     plt::figure_size(1200, 780);
-
-    plt::eventplot(events);
+    std::map<std::string, std::string> keywords;
+    keywords["linewidths"] = "0.5";
+    keywords["colors"] = "black";
+    plt::eventplot(events, keywords);
 
     // Add graph title
     plt::title("Event plot");

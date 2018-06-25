@@ -378,39 +378,53 @@ bool plot(const std::vector<Numeric> &x, const std::vector<Numeric> &y, const st
 template<typename Numeric>
 bool eventplot(const std::vector<std::vector<Numeric>> &events, const std::map<std::string, std::string>& keywords = std::map<std::string, std::string>())
 {
-    PyObject* list = PyList_New(events.size());
+    PyObject *list = PyList_New(events.size());
     // using numpy arrays
-    for(size_t i = 0; i < events.size(); i++) {
+    for (size_t i = 0; i < events.size(); i++) {
         PyList_SetItem(list, i, get_array(events[i]));
     }
 
-    PyObject* res;
+    PyObject *res;
     // construct positional args
-    if(keywords.size()>0) {
-        PyObject* args = PyTuple_New(2);
-        PyTuple_SetItem(args, 0, list);
+    PyObject *args = PyTuple_New(1);
+    PyTuple_SetItem(args, 0, list);
 
+    if (keywords.size() > 0) {
         // construct keyword args
-        PyObject* kwargs = PyDict_New();
-        for(std::map<std::string, std::string>::const_iterator it = keywords.begin(); it != keywords.end(); ++it)
-        {
-            PyDict_SetItemString(kwargs, it->first.c_str(), PyString_FromString(it->second.c_str()));
+        PyObject *kwargs = PyDict_New();
+        for (std::map<std::string, std::string>::const_iterator it =
+                    keywords.begin();
+                it != keywords.end(); ++it) {
+            bool is_number = false;
+            double value = 0.0;
+            try {
+                value = std::stod(it->second.c_str());
+                is_number = true;
+            }
+            catch( ... ) {}
+            if(is_number) {
+                PyDict_SetItemString(kwargs, it->first.c_str(),
+                                     PyFloat_FromDouble(value));
+            }
+            else {
+                PyDict_SetItemString(kwargs, it->first.c_str(),
+                                     PyString_FromString(it->second.c_str()));
+            }
         }
 
-        res = PyObject_CallObject(detail::_interpreter::get().s_python_function_eventplot, args);
+        res = PyObject_Call(
+                  detail::_interpreter::get().s_python_function_eventplot, args,
+                  kwargs);
         Py_DECREF(kwargs);
-        Py_DECREF(args);
     }
     else {
-        PyObject* args = PyTuple_New(1);
-        PyTuple_SetItem(args, 0, list);
-
-        res = PyObject_CallObject(detail::_interpreter::get().s_python_function_eventplot, args);
-
-        Py_DECREF(args);
+        res = PyObject_CallObject(
+                  detail::_interpreter::get().s_python_function_eventplot, args);
     }
 
-    if(res) Py_DECREF(res);
+    Py_DECREF(args);
+    if (res)
+        Py_DECREF(res);
     return res;
 }
 
@@ -545,7 +559,7 @@ bool plot(const std::vector<NumericX>& x, const std::vector<NumericY>& y, const 
     PyTuple_SetItem(plot_args, 0, xarray);
     PyTuple_SetItem(plot_args, 1, yarray);
     PyTuple_SetItem(plot_args, 2, pystring);
-
+    std::cout << "hey"<<std::endl;
     PyObject* res = PyObject_CallObject(detail::_interpreter::get().s_python_function_plot, plot_args);
 
     Py_DECREF(plot_args);
