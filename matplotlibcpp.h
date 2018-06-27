@@ -662,7 +662,7 @@ bool loglog(const std::vector<NumericX>& x, const std::vector<NumericY>& y, cons
 }
 
 template<typename NumericX, typename NumericY>
-bool errorbar(const std::vector<NumericX> &x, const std::vector<NumericY> &y, const std::vector<NumericX> &yerr, const std::string &s = "")
+bool errorbar(const std::vector<NumericX> &x, const std::vector<NumericY> &y, const std::vector<NumericX> &yerr)
 {
     assert(x.size() == y.size());
 
@@ -673,8 +673,6 @@ bool errorbar(const std::vector<NumericX> &x, const std::vector<NumericY> &y, co
     PyObject *kwargs = PyDict_New();
 
     PyDict_SetItemString(kwargs, "yerr", yerrarray);
-
-    PyObject *pystring = PyString_FromString(s.c_str());
 
     PyObject *plot_args = PyTuple_New(2);
     PyTuple_SetItem(plot_args, 0, xarray);
