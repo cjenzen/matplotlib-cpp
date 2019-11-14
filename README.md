@@ -41,7 +41,7 @@ int main()
         z.at(i) = log(i);
     }
 
-    // Set the size of output image = 1200x780 pixels
+    // Set the size of output image to 1200x780 pixels
     plt::figure_size(1200, 780);
     // Plot line from given x and y data. Color is selected automatically.
     plt::plot(x, y);
@@ -49,9 +49,10 @@ int main()
     plt::plot(x, w,"r--");
     // Plot a line whose name will show up as "log(x)" in the legend.
     plt::named_plot("log(x)", x, z);
-
     // Set x-axis to interval [0,1000000]
     plt::xlim(0, 1000*1000);
+    // Add graph title
+    plt::title("Sample figure");
     // Enable legend.
     plt::legend();
     // Save the image (file format is determined by the extension)
@@ -60,9 +61,11 @@ int main()
 ```
     g++ basic.cpp -I/usr/include/python2.7 -lpython2.7
 
-Result: ![Basic example](./examples/basic.png)
+**Result:**
 
-matplotlib-cpp doesn't require C++11, but will enable some additional syntactic sugar when available:
+![Basic example](./examples/basic.png)
+
+Alternatively, matplotlib-cpp also supports some C++11-powered syntactic sugar:
 ```cpp
 #include <cmath>
 #include "matplotlibcpp.h"
@@ -93,7 +96,9 @@ int main()
 ```
     g++ modern.cpp -std=c++11 -I/usr/include/python2.7 -lpython
 
-Result: ![Modern example](./examples/modern.png)
+**Result:**
+
+![Modern example](./examples/modern.png)
 
 Or some *funny-looking xkcd-styled* example:
 ```cpp
@@ -123,7 +128,66 @@ int main() {
 
 **Result:**
 
-![Minimal example](./examples/xkcd.png)
+![xkcd example](./examples/xkcd.png)
+
+When working with vector fields, you might be interested in quiver plots:
+```cpp
+#include "../matplotlibcpp.h"
+
+namespace plt = matplotlibcpp;
+
+int main()
+{
+    // u and v are respectively the x and y components of the arrows we're plotting
+    std::vector<int> x, y, u, v;
+    for (int i = -5; i <= 5; i++) {
+        for (int j = -5; j <= 5; j++) {
+            x.push_back(i);
+            u.push_back(-i);
+            y.push_back(j);
+            v.push_back(-j);
+        }
+    }
+
+    plt::quiver(x, y, u, v);
+    plt::show();
+}
+```
+    g++ quiver.cpp -std=c++11 -I/usr/include/python2.7 -lpython2.7
+
+**Result:**
+
+![quiver example](./examples/quiver.png)
+
+When working with 3d functions, you might be interested in 3d plots:
+```cpp
+#include "../matplotlibcpp.h"
+
+namespace plt = matplotlibcpp;
+
+int main()
+{
+    std::vector<std::vector<double>> x, y, z;
+    for (double i = -5; i <= 5;  i += 0.25) {
+        std::vector<double> x_row, y_row, z_row;
+        for (double j = -5; j <= 5; j += 0.25) {
+            x_row.push_back(i);
+            y_row.push_back(j);
+            z_row.push_back(::std::sin(::std::hypot(i, j)));
+        }
+        x.push_back(x_row);
+        y.push_back(y_row);
+        z.push_back(z_row);
+    }
+
+    plt::plot_surface(x, y, z);
+    plt::show();
+}
+```
+
+**Result:**
+
+![surface example](./examples/surface.png)
 
 Installation
 ------------
@@ -152,6 +216,16 @@ find_package(PythonLibs 2.7)
 target_include_directories(myproject PRIVATE ${PYTHON_INCLUDE_DIRS})
 target_link_libraries(myproject ${PYTHON_LIBRARIES})
 ```
+
+# C++11
+
+Currently, c++11 is required to build matplotlib-cpp. The last working commit that did
+not have this requirement was `717e98e752260245407c5329846f5d62605eff08`.
+
+Note that support for c++98 was dropped more or less accidentally, so if you have to work
+with an ancient compiler and still want to enjoy the latest additional features, I'd
+probably merge a PR that restores support.
+
 # Python 3
 
 This library supports both python2 and python3 (although the python3 support is probably far less tested,
