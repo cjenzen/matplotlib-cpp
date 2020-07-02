@@ -19,7 +19,7 @@ int main() {
   // Prepare keywords to pass to PolyCollection. See
   // https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.fill_between.html
   std::map<string, string> keywords;
-  keywords["alpha"] = "0.4";
+  //keywords["alpha"] = 0.4;
   keywords["color"] = "grey";
   keywords["hatch"] = "-";
 

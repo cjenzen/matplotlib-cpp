@@ -253,7 +253,7 @@ private:
     }
 
     ~_interpreter() {
-        Py_Finalize();
+        //Py_Finalize();
     }
 };
 
@@ -777,7 +777,6 @@ bool fill_between(const std::vector<Numeric>& x, const std::vector<Numeric>& y1,
     assert(x.size() == y1.size());
     assert(x.size() == y2.size());
 
-    detail::_interpreter::get();
 
     // using numpy arrays
     PyObject* xarray = detail::get_array(x);
