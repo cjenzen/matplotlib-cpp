@@ -30,7 +30,7 @@ A more comprehensive example:
 
 namespace plt = matplotlibcpp;
 
-int main() 
+int main()
 {
     // Prepare data.
     int n = 5000;
@@ -73,26 +73,26 @@ Alternatively, matplotlib-cpp also supports some C++11-powered syntactic sugar:
 using namespace std;
 namespace plt = matplotlibcpp;
 
-int main() 
-{    
+int main()
+{
     // Prepare data.
     int n = 5000; // number of data points
-    vector<double> x(n),y(n); 
+    vector<double> x(n),y(n);
     for(int i=0; i<n; ++i) {
         double t = 2*M_PI*i/n;
         x.at(i) = 16*sin(t)*sin(t)*sin(t);
         y.at(i) = 13*cos(t) - 5*cos(2*t) - 2*cos(3*t) - cos(4*t);
     }
 
-    // plot() takes an arbitrary number of (x,y,format)-triples. 
+    // plot() takes an arbitrary number of (x,y,format)-triples.
     // x must be iterable (that is, anything providing begin(x) and end(x)),
-    // y must either be callable (providing operator() const) or iterable. 
+    // y must either be callable (providing operator() const) or iterable.
     plt::plot(x, y, "r-", x, [](double d) { return 12.5+abs(sin(d)); }, "k-");
 
 
     // show plots
     plt::show();
-} 
+}
 ```
     g++ modern.cpp -std=c++11 -I/usr/include/python2.7 -lpython
 
@@ -199,23 +199,55 @@ On Ubuntu:
     sudo apt-get install python-matplotlib python-numpy python2.7-dev
 
 If, for some reason, you're unable to get a working installation of numpy on your system,
-you can add the define `WITHOUT_NUMPY` to erase this dependency.
+you can define the macro `WITHOUT_NUMPY` before including the header file to erase this
+dependency.
 
 The C++-part of the library consists of the single header file `matplotlibcpp.h` which can be placed
 anywhere.
 
-Since a python interpreter is opened internally, it is necessary to link against `libpython2.7` in order to use
-matplotlib-cpp.
+Since a python interpreter is opened internally, it is necessary to link against `libpython` in order
+to user matplotlib-cpp. Most versions should work, although `libpython2.7` and `libpython3.6` are
+probably the most regularly testedr.
+
 
 # CMake
 
 If you prefer to use CMake as build system, you will want to add something like this to your
 CMakeLists.txt:
+
+**Recommended way (since CMake 3.12):**
+
+It's easy to use cmake official [docs](https://cmake.org/cmake/help/git-stage/module/FindPython2.html#module:FindPython2) to find Python 2(or 3) interpreter, compiler and development environment (include directories and libraries).
+
+NumPy is optional here, delete it from cmake script, if you don't need it.
+
+```cmake
+find_package(Python2 COMPONENTS Development NumPy)
+target_include_directories(myproject PRIVATE ${Python2_INCLUDE_DIRS} ${Python2_NumPy_INCLUDE_DIRS})
+target_link_libraries(myproject Python2::Python Python2::NumPy)
+```
+
+**Alternative way (for CMake <= 3.11):**
+
 ```cmake
 find_package(PythonLibs 2.7)
 target_include_directories(myproject PRIVATE ${PYTHON_INCLUDE_DIRS})
 target_link_libraries(myproject ${PYTHON_LIBRARIES})
 ```
+
+
+# Vcpkg
+
+You can download and install matplotlib-cpp using the [vcpkg](https://github.com/Microsoft/vcpkg) dependency manager:
+
+    git clone https://github.com/Microsoft/vcpkg.git
+    cd vcpkg
+    ./bootstrap-vcpkg.sh
+    ./vcpkg integrate install
+    vcpkg install matplotlib-cpp
+  
+The matplotlib-cpp port in vcpkg is kept up to date by Microsoft team members and community contributors. If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
+
 
 # C++11
 
@@ -241,10 +273,10 @@ The same technique can be used for linking against a custom build of python
 
 Why?
 ----
-I initially started this library during my diploma thesis. The usual approach of 
+I initially started this library during my diploma thesis. The usual approach of
 writing data from the c++ algorithm to a file and afterwards parsing and plotting
 it in python using matplotlib proved insufficient: Keeping the algorithm
-and plotting code in sync requires a lot of effort when the C++ code frequently and substantially 
+and plotting code in sync requires a lot of effort when the C++ code frequently and substantially
 changes. Additionally, the python yaml parser was not able to cope with files that
 exceed a few hundred megabytes in size.
 
@@ -273,3 +305,6 @@ Todo/Issues/Wishlist
 
 * If you use Anaconda on Windows, you might need to set PYTHONHOME to Anaconda home directory and QT_QPA_PLATFORM_PLUGIN_PATH to %PYTHONHOME%Library/plugins/platforms. The latter is for especially when you get the error which says 'This application failed to start because it could not find or load the Qt platform plugin "windows"
 in "".'
+
+* MacOS: `Unable to import matplotlib.pyplot`. Cause: In mac os image rendering back end of matplotlib (what-is-a-backend to render using the API of Cocoa by default). There is Qt4Agg and GTKAgg and as a back-end is not the default. Set the back end of macosx that is differ compare with other windows or linux os.
+Solution is described [here](https://stackoverflow.com/questions/21784641/installation-issue-with-matplotlib-python?noredirect=1&lq=1), additional information can be found there too(see links in answers).
