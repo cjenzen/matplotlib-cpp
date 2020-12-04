@@ -350,6 +350,7 @@ template <> struct select_npy_type<unsigned long long> { const static NPY_TYPES 
 template<typename Numeric>
 PyObject* get_array(const std::vector<Numeric>& v)
 {
+    detail::_interpreter::get();
     npy_intp vsize = v.size();
     NPY_TYPES type = select_npy_type<Numeric>::type;
     if (type == NPY_NOTYPE) {
@@ -371,7 +372,7 @@ template<typename Numeric>
 PyObject* get_2darray(const std::vector<::std::vector<Numeric>>& v)
 {
     if (v.size() < 1) throw std::runtime_error("get_2d_array v too small");
-
+    detail::_interpreter::get();
     npy_intp vsize[2] = {static_cast<npy_intp>(v.size()),
                          static_cast<npy_intp>(v[0].size())};
 
@@ -408,6 +409,7 @@ PyObject* get_array(const std::vector<Numeric>& v)
 // sometimes, for labels and such, we need string arrays
 inline PyObject * get_array(const std::vector<std::string>& strings)
 {
+  detail::_interpreter::get();
   PyObject* list = PyList_New(strings.size());
   for (std::size_t i = 0; i < strings.size(); ++i) {
     PyList_SetItem(list, i, PyString_FromString(strings[i].c_str()));
@@ -419,6 +421,7 @@ inline PyObject * get_array(const std::vector<std::string>& strings)
 template<typename Numeric>
 PyObject* get_listlist(const std::vector<std::vector<Numeric>>& ll)
 {
+  detail::_interpreter::get();
   PyObject* listlist = PyList_New(ll.size());
   for (std::size_t i = 0; i < ll.size(); ++i) {
     PyList_SetItem(listlist, i, get_array(ll[i]));
