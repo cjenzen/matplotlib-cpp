@@ -109,6 +109,9 @@ struct _interpreter {
 
     static _interpreter& get() {
         static _interpreter ctx;
+#ifndef WITHOUT_NUMPY
+        ctx.import_numpy();
+#endif
         return ctx;
     }
 
